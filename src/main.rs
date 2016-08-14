@@ -2,11 +2,25 @@
 extern crate sdl2;
 
 // Internal dependencies
+#[macro_use]
 mod events;
 
 // Namespaces
-use events::Events;
 use sdl2::pixels::Color;
+
+// Macros
+struct_events! {
+    keyboard: {
+        key_escape: Escape,
+        key_up: Up,
+        key_down: Down,
+        key_left: Left,
+        key_right: Right
+    },
+    else: {
+        quit: Quit { .. }
+    }
+}
 
 fn main() {
     // Initialize SDL2
@@ -31,8 +45,8 @@ fn main() {
         // Pump new events
         events.pump();
 
-        // Check if we should quit the program
-        if events.quit || events.key_escape {
+        // Always quit
+        if events.now.quit || events.now.key_escape == Some(true) {
             break;
         }
 
