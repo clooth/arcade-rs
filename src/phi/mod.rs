@@ -26,6 +26,12 @@ pub struct Phi<'window> {
     pub renderer: Renderer<'window>, // Renderer holds a reference to Window
 }
 
+impl<'window> Phi<'window> {
+    pub fn output_size(&self) -> (f64, f64) {
+        let (w, h) = self.renderer.output_size().unwrap();
+        (w as f64, h as f64)
+    }
+}
 
 /// A `ViewAction` is a way for the currently executed view to communicate with the game loop.
 /// It specifies which action should be executed before the next rendering.
@@ -54,6 +60,7 @@ pub fn spawn<F>(title: &str, init: F)
     let window = video.window("Shooter", 800, 600)
         .position_centered()
         .opengl()
+        .resizable()
         .allow_highdpi()
         .build()
         .unwrap();
@@ -103,7 +110,7 @@ pub fn spawn<F>(title: &str, init: F)
 
         // Logic and rendering
 
-        context.events.pump();
+        context.events.pump(&mut context.renderer);
 
         match current_view.render(&mut context, 0.01) {
             ViewAction::None => context.renderer.present(),

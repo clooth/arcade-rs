@@ -11,5 +11,5 @@ use phi::{Events, Phi, View, ViewAction};
 
 // Main program
 fn main() {
-    ::phi::spawn("Shooter", |_| Box::new(::views::MenuView));
+    ::phi::spawn("Shooter", |phi| Box::new(::views::ShipView::new(phi)));
 }
