@@ -1,10 +1,12 @@
-// Include SDL2 crate
+// External dependencies
 extern crate sdl2;
 
-// Import namespaces for convenience
+// Internal dependencies
+mod events;
+
+// Namespaces
+use events::Events;
 use sdl2::pixels::Color;
-use std::thread;
-use std::time::Duration;
 
 fn main() {
     // Initialize SDL2
@@ -13,18 +15,30 @@ fn main() {
 
     // Create window
     let window = video.window("Shooter", 800, 600)
-        .position_centered().opengl()
+        .position_centered().opengl().allow_highdpi()
         .build().unwrap();
 
+    // Create renderer
     let mut renderer = window.renderer()
         .accelerated()
         .build().unwrap();
 
-    // Render a fully black window
-    renderer.set_draw_color(Color::RGB(0, 0, 0));
-    renderer.clear();
-    renderer.present();
+    // Initialize the events handler
+    let mut events = Events::new(sdl_context.event_pump().unwrap());
 
-    // Sleep for a bit before closing
-    thread::sleep(Duration::from_millis(3000));
+    // Game loop
+    loop {
+        // Pump new events
+        events.pump();
+
+        // Check if we should quit the program
+        if events.quit || events.key_escape {
+            break;
+        }
+
+        // Re-draw the scene
+        renderer.set_draw_color(Color::RGB(255, 255, 255));
+        renderer.clear();
+        renderer.present();
+    }
 }
