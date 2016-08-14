@@ -1,5 +1,6 @@
 // External dependencies
 extern crate sdl2;
+extern crate sdl2_image;
 
 // Internal dependencies
 mod phi;

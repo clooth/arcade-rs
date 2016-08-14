@@ -1,70 +1,23 @@
-// Namespaces
-use phi::{Phi, View, ViewAction};
+// External dependencies
+use std::path::Path;
 use sdl2::pixels::Color;
-use sdl2::rect::Rect as SdlRect;
+use sdl2::render::{Texture, TextureQuery};
+use sdl2_image::LoadTexture;
 
+// Internal dependencies
+use phi::{Phi, View, ViewAction};
+use phi::data::Rectangle;
 
 /// Pixels traveled by the player's hip every second when it's moving.
 const PLAYER_SPEED: f64 = 180.0;
 
-
-/// Simple Rectangle struct that uses real coordinates instead of integral ones.
-/// Allows us to add some utility methods (for example collision checking).
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Rectangle {
-    pub x: f64,
-    pub y: f64,
-    pub w: f64,
-    pub h: f64,
-}
-
-impl Rectangle {
-    /// Generates an SDL-compatible Rect equivalent to `self`
-    /// Panics if it could not be created, for example if a
-    /// coordinate of a corner overflows an `i32`.
-    pub fn to_sdl(self) -> SdlRect {
-        // Reject negative width and height
-        assert!(self.w >= 0.0 && self.h >= 0.0);
-
-        // SdlRect::new : `(i32, i32, u32, u32) -> Result<Option<SdlRect>>`
-        SdlRect::new(self.x as i32, self.y as i32, self.w as u32, self.h as u32)
-    }
-
-    /// Return a (perhaps moved) rectangle which is contained by a `parent`
-    /// rectangle. If it can indeed be moved to fit, Return `Some(result)`;
-    /// otherwise, return `None`.
-    pub fn move_inside(self, parent: Rectangle) -> Option<Rectangle> {
-        // It must be smaller than the parent to fit
-        if self.w > parent.w || self.h > parent.h {
-            return None;
-        }
-
-        Some(Rectangle {
-            w: self.w,
-            h: self.h,
-
-            x: if self.x < parent.x {
-                parent.x
-            } else if self.x + self.w >= parent.x + parent.w {
-                parent.x + parent.w - self.w
-            } else {
-                self.x
-            },
-
-            y: if self.y < parent.y {
-                parent.y
-            } else if self.y + self.h >= parent.y + parent.h {
-                parent.y + parent.h - self.h
-            } else {
-                self.y
-            },
-        })
-    }
-}
+const SHIP_WIDTH: f64 = 43.0;
+const SHIP_HEIGHT: f64 = 39.0;
 
 
 struct Ship {
     rect: Rectangle,
+    texture: Texture,
 }
 
 
@@ -79,9 +32,10 @@ impl ShipView {
                 rect: Rectangle {
                     x: 64.0,
                     y: 64.0,
-                    w: 32.0,
-                    h: 32.0,
+                    w: SHIP_WIDTH,
+                    h: SHIP_HEIGHT,
                 },
+                texture: phi.renderer.load_texture(Path::new("assets/spaceship.png")).unwrap(),
             },
         }
     }
@@ -144,6 +98,17 @@ impl View for ShipView {
         // Render the scene
         phi.renderer.set_draw_color(Color::RGB(231, 76, 60));
         phi.renderer.fill_rect(self.player.rect.to_sdl());
+
+        // Render the sprite
+        phi.renderer.copy(&mut self.player.texture,
+                          Some(Rectangle {
+                                  x: SHIP_WIDTH * 0.0,
+                                  y: SHIP_HEIGHT * 1.0,
+                                  w: self.player.rect.w,
+                                  h: self.player.rect.h,
+                              }
+                              .to_sdl()),
+                          Some(self.player.rect.to_sdl()));
 
         ViewAction::None
     }
