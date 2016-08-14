@@ -13,8 +13,7 @@ fn main() {
 
     // Create window
     let window = video.window("Shooter", 800, 600)
-        .position_centered()
-        .opengl()
+        .position_centered().opengl()
         .build().unwrap();
 
     let mut renderer = window.renderer()
